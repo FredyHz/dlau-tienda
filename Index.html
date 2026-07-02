@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D'LAU · Ropa, zapatos y accesorios</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       BARRA SUPERIOR DE ANUNCIOS
+       Admin puede cambiar el texto desde el panel
+  ═══════════════════════════════════════════ -->
+  <div class="topbar" id="el-topbar">
+    ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 &nbsp;·&nbsp; NUEVA COLECCIÓN DISPONIBLE
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       NAVEGACIÓN PRINCIPAL
+  ═══════════════════════════════════════════ -->
+  <nav>
+    <a class="nav-logo" href="#">
+      <!-- Cambia logo.png por el nombre de tu archivo de logo -->
+      <img class="nav-logo-img" id="logo-nav" src="logo.png" alt="D'LAU" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2252%22 height=%2252%22%3E%3Ccircle cx=%2226%22 cy=%2226%22 r=%2225%22 fill=%22%23C9A84C%22 opacity=%22.12%22 stroke=%22%23C9A84C%22 stroke-width=%221%22/%3E%3Ctext x=%2250%25%22 y=%2255%25%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22 font-size=%2216%22 fill=%22%23111114%22 font-family=%22serif%22%3EDL%3C/text%3E%3C/svg%3E'">
+      <div class="nav-logo-text">
+        <span class="nav-brand"><span class="gold">D</span>'LAU</span>
+        <span class="nav-slogan-small" id="nav-slogan-el">Ropa, zapatos y accesorios</span>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#" onclick="filtrarPorCategoria('ropa-mujer')">Ropa Mujer</a></li>
+      <li><a href="#" onclick="filtrarPorCategoria('ropa-hombre')">Ropa Hombre</a></li>
+      <li><a href="#" onclick="filtrarPorCategoria('zapatos-mujer')">Zapatos</a></li>
+      <li><a href="#" onclick="filtrarPorCategoria('accesorios')">Accesorios</a></li>
+      <li><a href="#" onclick="filtrarPorCategoria('ofertas')">Ofertas</a></li>
+      <li><a href="#catalogos">Catálogos</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <button class="btn-admin" onclick="openAdmin()">⚙ Admin</button>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════
+       SECCIÓN HERO (PORTADA PRINCIPAL)
+  ═══════════════════════════════════════════ -->
+  <section class="hero" id="hero-section">
+    <div class="hero-bg-pattern"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+      <span class="hero-crown">👑</span>
+      <span class="hero-eyebrow" id="h-eyebrow">Nueva Temporada · 2026</span>
+      <div class="hero-logo-area">
+        <img class="hero-logo-main" id="hero-logo-img" src="logo.png" alt="D'LAU"
+          onerror="this.style.display='none'">
+      </div>
+      <div class="hero-name">D<em>'</em>LAU</div>
+      <div class="hero-slogan" id="h-slogan">Ropa, zapatos y accesorios · Moda que te define</div>
+      <div class="hero-line"><div class="hero-diamond"></div></div>
+      <div class="hero-ctas">
+        <a class="cta cta-filled" href="#productos">Ver Colección</a>
+        <a class="cta cta-outline" href="#catalogos">Catálogos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Separador dorado -->
+  <div class="sep">
+    <div class="sep-line"></div>
+    <div class="sep-icon">♦ ♦ ♦</div>
+    <div class="sep-line"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SECCIÓN CATEGORÍAS (mínimo 6, editables desde admin)
+  ═══════════════════════════════════════════ -->
+  <section id="categorias">
+    <div class="section" style="padding-bottom: 0;">
+      <div class="sec-label">Explora nuestra tienda</div>
+      <div class="sec-title">Categorías</div>
+      <div class="sec-sub">Encuentra tu estilo perfecto</div>
+    </div>
+    <!-- Las tarjetas de categoría se generan dinámicamente desde admin.js -->
+    <div class="cats-grid" id="cats-grid"></div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SECCIÓN PRODUCTOS DESTACADOS (con filtro por categoría)
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="productos">
+    <div class="sec-label">Lo más visto</div>
+    <div class="sec-title">Productos</div>
+    <div class="sec-sub">Número ilimitado de artículos por categoría</div>
+
+    <!-- Filtros de categoría, generados dinámicamente -->
+    <div class="filtros-cat" id="filtros-cat"></div>
+
+    <!-- Los productos se renderizan aquí por admin.js -->
+    <div class="prods-grid" id="prods-grid"></div>
+  </section>
+
+  <div class="sep">
+    <div class="sep-line"></div>
+    <div class="sep-icon">♦</div>
+    <div class="sep-line"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BANNER DE OFERTA ESPECIAL
+  ═══════════════════════════════════════════ -->
+  <div class="oferta" id="oferta">
+    <div class="oferta-txt">
+      <div class="oferta-tag">Oferta Especial 👑</div>
+      <div class="oferta-pct">
+        <span id="o-pct-el">30</span><span class="oferta-pct-sym">%</span>
+      </div>
+      <div class="oferta-titl" id="o-tit-el">En toda la colección de temporada</div>
+      <div class="oferta-desc" id="o-desc-el">
+        Piezas exclusivas con el estilo que te define.<br>
+        Tiempo limitado · Solo esta semana.
+      </div>
+      <a class="cta cta-filled" href="#productos">Ver Ofertas</a>
+    </div>
+    <!-- La imagen de oferta se pone desde el panel admin -->
+    <div class="oferta-visual" id="oferta-vis">
+      <span style="font-size:28px;">📸</span>
+      <span class="oferta-visual-txt">Sube imagen desde el panel admin</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SECCIÓN CATÁLOGOS
+  ═══════════════════════════════════════════ -->
+  <section class="catalogo-section" id="catalogos">
+    <div class="sec-label">Descarga</div>
+    <div class="sec-title">Nuestros Catálogos</div>
+    <!-- Los catálogos se renderizan aquí por admin.js -->
+    <div class="cats-pub-list" id="cats-pub-list">
+      <div class="cat-empty-msg">
+        Los catálogos aparecerán aquí cuando el administrador los suba.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       NEWSLETTER
+  ═══════════════════════════════════════════ -->
+  <div class="newsletter">
+    <span class="nl-crown">👑</span>
+    <div class="sec-label" style="text-align:center;">Exclusivo para ti</div>
+    <div class="sec-title" style="text-align:center;">Sé la primera en saberlo</div>
+    <div class="nl-input-row">
+      <input class="nl-input" type="email" placeholder="tu@correo.com" id="nl-email">
+      <button class="nl-btn" onclick="suscribir()">Suscribirse</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════ -->
+  <footer>
+    <div class="foot-col-main">
+      <div class="foot-logo"><span class="gold">D</span>'LAU</div>
+      <div class="foot-slogan-txt">Ropa, zapatos y accesorios</div>
+      <div class="foot-desc">Moda consciente y elegante para quien se atreve a brillar.</div>
+    </div>
+    <div class="foot-col">
+      <h4>Tienda</h4>
+      <ul>
+        <li><a href="#" onclick="filtrarPorCategoria('ropa-mujer')">Ropa Mujer</a></li>
+        <li><a href="#" onclick="filtrarPorCategoria('ropa-hombre')">Ropa Hombre</a></li>
+        <li><a href="#" onclick="filtrarPorCategoria('zapatos-mujer')">Zapatos Mujer</a></li>
+        <li><a href="#" onclick="filtrarPorCategoria('zapatos-hombre')">Zapatos Hombre</a></li>
+        <li><a href="#" onclick="filtrarPorCategoria('accesorios')">Accesorios</a></li>
+        <li><a href="#" onclick="filtrarPorCategoria('ofertas')">Ofertas</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h4>Ayuda</h4>
+      <ul>
+        <li>Envíos</li>
+        <li>Devoluciones</li>
+        <li>Guía de tallas</li>
+        <li>Contacto</li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h4>Síguenos</h4>
+      <ul>
+        <li id="foot-ig">Instagram</li>
+        <li>Facebook</li>
+        <li>TikTok</li>
+        <li>Pinterest</li>
+      </ul>
+    </div>
+  </footer>
+  <div class="foot-bottom">© 2026 D'LAU · Todos los derechos reservados</div>
+
+  <!-- ═══════════════════════════════════════════
+       NOTIFICACIÓN TOAST (aparece al guardar)
+  ═══════════════════════════════════════════ -->
+  <div class="toast" id="toast">Cambios guardados ✓</div>
+
+  <!-- ═══════════════════════════════════════════
+       PANEL DE ADMINISTRADOR
+       Solo visible al ingresar la contraseña
+  ═══════════════════════════════════════════ -->
+  <div class="adm-overlay" id="admOverlay">
+
+    <!-- PANTALLA DE LOGIN -->
+    <div class="login-box" id="loginBox">
+      <span class="login-crown">👑</span>
+      <div class="login-logo"><em class="gold">D</em>'LAU</div>
+      <div class="login-h">Panel de Administración</div>
+      <div class="login-sub">Solo para administrador</div>
+      <input class="adm-inp" type="password" placeholder="Contraseña"
+        id="passInp" onkeydown="if(event.key==='Enter') checkPass()">
+      <button class="btn-login" onclick="checkPass()">Ingresar</button>
+      <div class="login-err" id="loginErr">Contraseña incorrecta. Intenta de nuevo.</div>
+      <div style="margin-top:20px;">
+        <button class="btn-x" onclick="closeAdmin()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- PANEL COMPLETO (visible tras login) -->
+    <div class="adm-content" id="admContent">
+      <div class="adm-wrap">
+
+        <div class="adm-hdr">
+          <div class="adm-title"><em class="gold">D</em>'LAU · Admin</div>
+          <button class="btn-x" onclick="closeAdmin()">✕ Cerrar sesión</button>
+        </div>
+
+        <!-- PESTAÑAS DEL PANEL -->
+        <div class="adm-tabs">
+          <button class="adm-tab on" onclick="switchTab('hero', this)">🏠 Hero</button>
+          <button class="adm-tab" onclick="switchTab('logo', this)">👑 Logo</button>
+          <button class="adm-tab" onclick="switchTab('categorias', this)">🗂 Categorías</button>
+          <button class="adm-tab" onclick="switchTab('prods', this)">🛍 Productos</button>
+          <button class="adm-tab" onclick="switchTab('oferta', this)">🏷 Oferta</button>
+          <button class="adm-tab" onclick="switchTab('cats', this)">📄 Catálogos</button>
+          <button class="adm-tab" onclick="switchTab('info', this)">⚙ General</button>
+        </div>
+
+        <!-- TAB: HERO -->
+        <div class="tab-s on" id="tab-hero">
+          <div class="fg">
+            <label class="flbl">Texto pequeño encima del logo</label>
+            <input class="fi" id="a-eyebrow" placeholder="Nueva Temporada · 2026">
+          </div>
+          <div class="fg">
+            <label class="flbl">Eslogan principal del hero</label>
+            <input class="fi" id="a-slogan" placeholder="Ropa, zapatos y accesorios · Moda que te define">
+          </div>
+          <div class="fg">
+            <label class="flbl">Imagen de fondo del hero (opcional)</label>
+            <div class="upl" onclick="document.getElementById('inp-hero-bg').click()">
+              <div style="font-size:28px;">🖼</div>
+              <p>Clic para subir foto de fondo</p>
+              <input type="file" id="inp-hero-bg" accept="image/*" onchange="uploadHeroBg(this)">
+            </div>
+            <div class="upl-prev" id="prev-hero-bg"></div>
+          </div>
+          <button class="btn-save" onclick="saveHero()">Guardar Hero</button>
+        </div>
+
+        <!-- TAB: LOGO -->
+        <div class="tab-s" id="tab-logo">
+          <p class="tab-note">Sube tu logo para que aparezca en el navbar y en el hero. Recomendado: PNG con fondo transparente.</p>
+          <div class="fg">
+            <label class="flbl">Logo principal</label>
+            <div class="upl" onclick="document.getElementById('inp-logo').click()">
+              <div style="font-size:32px;">👑</div>
+              <p>Subir logo (PNG recomendado)</p>
+              <input type="file" id="inp-logo" accept="image/*" onchange="uploadLogo(this)">
+            </div>
+            <div class="upl-prev" id="prev-logo"></div>
+          </div>
+          <button class="btn-save" onclick="showToast('Logo actualizado ✓')">Aplicar Logo</button>
+        </div>
+
+        <!-- TAB: CATEGORÍAS -->
+        <div class="tab-s" id="tab-categorias">
+          <p class="tab-note">Edita el nombre, subtítulo y foto de cada categoría. Las 6 principales (Ropa Mujer, Ropa Hombre, Zapatos Mujer, Zapatos Hombre, Accesorios y Ofertas) son fijas, pero puedes agregar categorías adicionales si lo necesitas.</p>
+          <div id="cats-admin-fields"></div>
+          <button class="btn-save" onclick="addCategoria()" style="background:transparent;border:1px solid #C9A84C;color:#C9A84C;">+ Agregar categoría nueva</button>
+        </div>
+
+        <!-- TAB: PRODUCTOS -->
+        <div class="tab-s" id="tab-prods">
+          <p class="tab-note">Puedes agregar tantos productos como quieras en cada categoría, sin límite de cantidad.</p>
+          <div class="adm-prods-list" id="adm-prods-list"></div>
+          <div class="divider-gold"></div>
+          <div class="tab-section-label">Agregar nuevo producto</div>
+          <div class="f2">
+            <div class="fg">
+              <label class="flbl">Nombre del producto</label>
+              <input class="fi" id="p-n" placeholder="Blusa Seda Italiana">
+            </div>
+            <div class="fg">
+              <label class="flbl">Precio</label>
+              <input class="fi" id="p-p" placeholder="$1,200">
+            </div>
+          </div>
+          <div class="f2">
+            <div class="fg">
+              <label class="flbl">Precio anterior tachado (opcional)</label>
+              <input class="fi" id="p-po" placeholder="$1,600">
+            </div>
+            <div class="fg">
+              <label class="flbl">Badge</label>
+              <select class="fi" id="p-b">
+                <option value="">Sin badge</option>
+                <option value="nuevo">Nuevo</option>
+                <option value="oferta">Oferta</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="flbl">Categoría</label>
+            <select class="fi" id="p-c"></select>
+          </div>
+          <div class="fg">
+            <label class="flbl">Foto del producto</label>
+            <div class="upl" onclick="document.getElementById('inp-prod-img').click()">
+              <div style="font-size:28px;">📸</div>
+              <p>Subir foto del producto</p>
+              <input type="file" id="inp-prod-img" accept="image/*" onchange="uploadProdImg(this)">
+            </div>
+            <div class="upl-prev" id="prev-prod-img"></div>
+          </div>
+          <button class="btn-save" onclick="addProd()">Agregar Producto</button>
+        </div>
+
+        <!-- TAB: OFERTA -->
+        <div class="tab-s" id="tab-oferta">
+          <div class="f2">
+            <div class="fg">
+              <label class="flbl">Porcentaje de descuento (solo el número)</label>
+              <input class="fi" id="a-opct" placeholder="30">
+            </div>
+            <div class="fg">
+              <label class="flbl">Título de la oferta</label>
+              <input class="fi" id="a-otit" placeholder="En toda la colección de temporada">
+            </div>
+          </div>
+          <div class="fg">
+            <label class="flbl">Descripción</label>
+            <textarea class="fi" id="a-odesc" placeholder="Texto descriptivo de la oferta..."></textarea>
+          </div>
+          <div class="fg">
+            <label class="flbl">Imagen de la oferta</label>
+            <div class="upl" onclick="document.getElementById('inp-oferta-img').click()">
+              <div style="font-size:28px;">🏷</div>
+              <p>Subir imagen de oferta</p>
+              <input type="file" id="inp-oferta-img" accept="image/*" onchange="uploadOfertaImg(this)">
+            </div>
+            <div class="upl-prev" id="prev-oferta-img"></div>
+          </div>
+          <button class="btn-save" onclick="saveOferta()">Guardar Oferta</button>
+        </div>
+
+        <!-- TAB: CATÁLOGOS -->
+        <div class="tab-s" id="tab-cats">
+          <p class="tab-note">Sube catálogos en PDF o imagen. Aparecerán en la sección de catálogos de la página.</p>
+          <div class="fg">
+            <label class="flbl">Nombre del catálogo</label>
+            <input class="fi" id="c-n" placeholder="Catálogo Primavera 2026">
+          </div>
+          <div class="fg">
+            <label class="flbl">Archivo (PDF o imagen)</label>
+            <div class="upl" onclick="document.getElementById('inp-cat-file').click()">
+              <div style="font-size:28px;">📄</div>
+              <p>Subir catálogo PDF o imagen</p>
+              <input type="file" id="inp-cat-file" accept=".pdf,image/*" onchange="uploadCat(this)">
+            </div>
+            <div id="cat-fname" style="font-size:10px;color:#C9A84C;margin-top:6px;letter-spacing:1px;"></div>
+          </div>
+          <button class="btn-save" onclick="addCat()">Agregar Catálogo</button>
+          <div class="divider-gold"></div>
+          <div class="adm-cats-lista" id="adm-cats-lista"></div>
+        </div>
+
+        <!-- TAB: GENERAL -->
+        <div class="tab-s" id="tab-info">
+          <div class="fg">
+            <label class="flbl">Texto del banner superior (anuncios)</label>
+            <input class="fi" id="a-topbar" placeholder="ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500...">
+          </div>
+          <div class="fg">
+            <label class="flbl">Eslogan del navbar (debajo del logo)</label>
+            <input class="fi" id="a-nav-slogan" placeholder="Ropa, zapatos y accesorios">
+          </div>
+          <div class="f2">
+            <div class="fg">
+              <label class="flbl">WhatsApp / Teléfono</label>
+              <input class="fi" id="a-wa" placeholder="+52 55 1234 5678">
+            </div>
+            <div class="fg">
+              <label class="flbl">Instagram</label>
+              <input class="fi" id="a-ig" placeholder="@dlau">
+            </div>
+          </div>
+          <div class="fg">
+            <label class="flbl">Cambiar contraseña del panel</label>
+            <input class="fi" type="password" id="a-newpass" placeholder="Nueva contraseña">
+          </div>
+          <button class="btn-save" onclick="saveInfo()">Guardar Información</button>
+        </div>
+
+      </div><!-- fin adm-wrap -->
+    </div><!-- fin admContent -->
+  </div><!-- fin adm-overlay -->
+
+  <!-- SDK DE FIREBASE (base de datos en la nube) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- FIREBASE (base de datos en la nube) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- SCRIPT PRINCIPAL -->
+  <script src="admin.js"></script>
+
+</body>
+</html>
