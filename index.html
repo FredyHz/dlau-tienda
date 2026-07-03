@@ -10,6 +10,27 @@
 <body>
 
   <!-- ═══════════════════════════════════════════
+       INTRODUCCIÓN ANIMADA DE BIENVENIDA
+  ═══════════════════════════════════════════ -->
+  <div class="intro-overlay" id="introOverlay">
+    <div class="intro-prendas">
+      <span class="intro-prenda p1">👗</span>
+      <span class="intro-prenda p2">👠</span>
+      <span class="intro-prenda p3">👜</span>
+      <span class="intro-prenda p4">💍</span>
+      <span class="intro-prenda p5">🧥</span>
+      <span class="intro-prenda p6">👞</span>
+      <span class="intro-prenda p7">🕶️</span>
+      <span class="intro-prenda p8">👑</span>
+    </div>
+    <div class="intro-content">
+      <div class="intro-logo">D<em>'</em>LAU</div>
+      <div class="intro-line"><div class="intro-diamond"></div></div>
+      <div class="intro-msg">Gracias por su preferencia</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
        BARRA SUPERIOR DE ANUNCIOS
        Admin puede cambiar el texto desde el panel
   ═══════════════════════════════════════════ -->
@@ -40,6 +61,9 @@
     </ul>
 
     <div class="nav-right">
+      <button class="btn-cart" onclick="toggleCarrito()" title="Ver carrito">
+        🛍<span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+      </button>
       <button class="btn-admin" onclick="openAdmin()">⚙ Admin</button>
     </div>
   </nav>
@@ -159,6 +183,15 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
+       REDES SOCIALES
+  ═══════════════════════════════════════════ -->
+  <div class="redes-section">
+    <div class="sec-label" style="text-align:center;">Síguenos</div>
+    <div class="sec-title" style="text-align:center;">Conecta con D'LAU</div>
+    <div class="redes-grid" id="redes-grid"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
        FOOTER
   ═══════════════════════════════════════════ -->
   <footer>
@@ -189,11 +222,11 @@
     </div>
     <div class="foot-col">
       <h4>Síguenos</h4>
-      <ul>
-        <li id="foot-ig">Instagram</li>
+      <ul id="foot-redes-list">
+        <li>Instagram</li>
         <li>Facebook</li>
         <li>TikTok</li>
-        <li>Pinterest</li>
+        <li>WhatsApp</li>
       </ul>
     </div>
   </footer>
@@ -242,6 +275,7 @@
           <button class="adm-tab" onclick="switchTab('prods', this)">🛍 Productos</button>
           <button class="adm-tab" onclick="switchTab('oferta', this)">🏷 Oferta</button>
           <button class="adm-tab" onclick="switchTab('cats', this)">📄 Catálogos</button>
+          <button class="adm-tab" onclick="switchTab('asistente', this)">💬 Asistente</button>
           <button class="adm-tab" onclick="switchTab('info', this)">⚙ General</button>
         </div>
 
@@ -384,6 +418,36 @@
           <div class="adm-cats-lista" id="adm-cats-lista"></div>
         </div>
 
+        <!-- TAB: ASISTENTE VIRTUAL -->
+        <div class="tab-s" id="tab-asistente">
+          <p class="tab-note">Edita lo que responde "Lau", el asistente virtual del sitio, cuando alguien le pregunta por envíos, tallas, pagos, horario o contacto. Los cambios se publican al instante.</p>
+          <div class="fg">
+            <label class="flbl">Mensaje de saludo inicial</label>
+            <textarea class="fi" id="a-as-saludo" placeholder="¡Hola! Soy Lau, tu asistente virtual 👋"></textarea>
+          </div>
+          <div class="fg">
+            <label class="flbl">Respuesta sobre envíos</label>
+            <textarea class="fi" id="a-as-envios" placeholder="Información de envíos..."></textarea>
+          </div>
+          <div class="fg">
+            <label class="flbl">Respuesta sobre tallas</label>
+            <textarea class="fi" id="a-as-tallas" placeholder="Información de tallas..."></textarea>
+          </div>
+          <div class="fg">
+            <label class="flbl">Respuesta sobre formas de pago</label>
+            <textarea class="fi" id="a-as-pagos" placeholder="Información de pagos..."></textarea>
+          </div>
+          <div class="fg">
+            <label class="flbl">Respuesta sobre horario de atención</label>
+            <textarea class="fi" id="a-as-horario" placeholder="Información de horario..."></textarea>
+          </div>
+          <div class="fg">
+            <label class="flbl">Respuesta sobre contacto</label>
+            <textarea class="fi" id="a-as-contacto" placeholder="Información de contacto..."></textarea>
+          </div>
+          <button class="btn-save" onclick="guardarAsistente()">Guardar Asistente</button>
+        </div>
+
         <!-- TAB: GENERAL -->
         <div class="tab-s" id="tab-info">
           <div class="fg">
@@ -394,15 +458,23 @@
             <label class="flbl">Eslogan del navbar (debajo del logo)</label>
             <input class="fi" id="a-nav-slogan" placeholder="Ropa, zapatos y accesorios">
           </div>
+          <div class="fg">
+            <label class="flbl">Número de WhatsApp (con código de país, solo números)</label>
+            <input class="fi" id="a-wa" placeholder="5215512345678">
+          </div>
           <div class="f2">
             <div class="fg">
-              <label class="flbl">WhatsApp / Teléfono</label>
-              <input class="fi" id="a-wa" placeholder="+52 55 1234 5678">
+              <label class="flbl">Link de Instagram</label>
+              <input class="fi" id="a-ig" placeholder="https://instagram.com/dlau">
             </div>
             <div class="fg">
-              <label class="flbl">Instagram</label>
-              <input class="fi" id="a-ig" placeholder="@dlau">
+              <label class="flbl">Link de Facebook</label>
+              <input class="fi" id="a-fb" placeholder="https://facebook.com/dlau">
             </div>
+          </div>
+          <div class="fg">
+            <label class="flbl">Link de TikTok</label>
+            <input class="fi" id="a-tt" placeholder="https://tiktok.com/@dlau">
           </div>
           <div class="fg">
             <label class="flbl">Cambiar contraseña del panel</label>
@@ -418,6 +490,50 @@
   <!-- SDK DE FIREBASE (base de datos en la nube) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- ═══════════════════════════════════════════
+       ASISTENTE VIRTUAL — CHAT FLOTANTE
+  ═══════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════
+       CARRITO DE COMPRAS
+  ═══════════════════════════════════════════ -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCarrito()"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <div class="cart-title">Tu Carrito</div>
+      <button class="chat-close" onclick="toggleCarrito()">✕</button>
+    </div>
+    <div class="cart-body" id="cartBody"></div>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span id="cartTotal">$0</span>
+      </div>
+      <button class="cart-buy-btn" onclick="comprarPorWhatsapp()">🛍 Comprar por WhatsApp</button>
+      <p class="cart-note">Se abrirá un chat de WhatsApp con tu pedido para confirmar detalles, tallas y envío.</p>
+    </div>
+  </div>
+
+  <button class="chat-bubble-btn" onclick="toggleChat()" id="chatBubbleBtn" title="Habla con Lau, tu asistente">💬</button>
+
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <span class="chat-avatar">👑</span>
+        <div>
+          <div class="chat-title">Lau</div>
+          <div class="chat-subtitle">Asistente virtual · D'LAU</div>
+        </div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-quick-replies" id="chatQuickReplies"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Escribe tu pregunta..." onkeydown="if(event.key==='Enter') enviarMensajeChat()">
+      <button onclick="enviarMensajeChat()">➤</button>
+    </div>
+  </div>
 
   <!-- FIREBASE (base de datos en la nube) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>

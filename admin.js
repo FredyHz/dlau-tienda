@@ -41,6 +41,17 @@ let siteData = {
   ofertaTitulo:"En toda la colección de temporada",
   ofertaDesc:  "Piezas exclusivas con el estilo que te define.<br>Tiempo limitado · Solo esta semana.",
   ofertaImg:   "",
+  whatsapp:    "",
+  facebook:    "",
+  tiktok:      "",
+  asistente: {
+    saludo:   "¡Hola! Soy Lau, tu asistente virtual 👋 ¿En qué te puedo ayudar hoy?",
+    envios:   "Hacemos envíos a todo el país. Los pedidos mayores a $1,500 tienen envío gratis, y el tiempo de entrega es de 3 a 5 días hábiles.",
+    tallas:   "Manejamos tallas desde la S hasta la XL en ropa, y del 22 al 27 en calzado. Si tienes dudas sobre tu talla ideal, escríbenos y con gusto te asesoramos.",
+    pagos:    "Aceptamos transferencia bancaria, tarjeta de crédito/débito y, en algunas zonas, pago contra entrega.",
+    horario:  "Atendemos pedidos y dudas de lunes a sábado, de 10:00 am a 7:00 pm.",
+    contacto: "Puedes escribirnos por WhatsApp o Instagram, los encuentras al final de la página 💛"
+  },
   categorias: [
     { id: "ropa-mujer",     nombre: "Ropa Mujer",     sub: "Nueva colección",     img: "" },
     { id: "ropa-hombre",    nombre: "Ropa Hombre",    sub: "Estilo y actitud",    img: "" },
@@ -61,12 +72,21 @@ let siteData = {
 /* Almacén temporal para archivos subidos en el panel (antes de guardar) */
 let tmp = {};
 
+/* Guardamos una copia de los valores por defecto para poder
+   completar campos nuevos que aún no existan en documentos
+   guardados anteriormente (por ejemplo, al agregar el asistente
+   virtual después de que la tienda ya tenía datos guardados). */
+const siteDataPorDefecto = JSON.parse(JSON.stringify(siteData));
+
 /* ═══════════════════════════════════════════════════════════
    CONEXIÓN CON FIREBASE — TIEMPO REAL
 ═══════════════════════════════════════════════════════════ */
 siteRef.onSnapshot((doc) => {
   if (doc.exists) {
-    siteData = doc.data();
+    /* Combinamos lo guardado con los valores por defecto, para
+       que si falta algún campo nuevo (como "asistente"), no truene */
+    siteData = Object.assign({}, siteDataPorDefecto, doc.data());
+    siteData.asistente = Object.assign({}, siteDataPorDefecto.asistente, doc.data().asistente || {});
     ADMIN_PASS = siteData.adminPass || ADMIN_PASS;
   } else {
     /* Primera vez: no existe el documento, lo creamos con los valores por defecto */
@@ -145,6 +165,7 @@ function renderAll() {
   renderFiltrosPub();
   renderProductos();
   renderCatalogosPub();
+  renderRedesSociales();
 
   /* Listas del panel admin (solo lectura, seguro refrescarlas siempre) */
   renderAdminProductos();
@@ -224,7 +245,9 @@ function renderProductos() {
     return;
   }
 
-  grid.innerHTML = lista.map((p) => `
+  grid.innerHTML = lista.map((p) => {
+    const idxReal = siteData.productos.indexOf(p);
+    return `
     <div class="prod">
       <div class="prod-visual">
         ${p.img
@@ -242,14 +265,50 @@ function renderProductos() {
           ${p.po ? `<span class="prod-precio-old">${p.po}</span>` : ''}
           <span class="prod-precio">${p.p}</span>
         </div>
+        <button class="prod-add-cart" onclick="agregarAlCarrito(${idxReal})">+ Agregar al carrito</button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 /* ═══════════════════════════════════════════════════════════
-   RENDERIZADO DE PRODUCTOS EN EL PANEL ADMIN
+   REDES SOCIALES — botones circulares y footer
 ═══════════════════════════════════════════════════════════ */
+function linkWhatsapp() {
+  const numero = (siteData.whatsapp || '').replace(/\D/g, '');
+  return numero ? `https://wa.me/${numero}` : '';
+}
+
+function renderRedesSociales() {
+  const redes = [
+    { key: 'instagram', icono: '📷', url: siteData.instagram },
+    { key: 'facebook',  icono: '📘', url: siteData.facebook },
+    { key: 'tiktok',    icono: '🎵', url: siteData.tiktok },
+    { key: 'whatsapp',  icono: '💬', url: linkWhatsapp() }
+  ].filter(r => r.url);
+
+  const grid = document.getElementById('redes-grid');
+  if (grid) {
+    if (redes.length === 0) {
+      grid.innerHTML = '<p style="font-size:11px;color:#B7B4AC;letter-spacing:2px;text-transform:uppercase;">Agrega tus redes desde el panel admin</p>';
+    } else {
+      grid.innerHTML = redes.map(r => `<a class="red-btn" href="${r.url}" target="_blank" rel="noopener">${r.icono}</a>`).join('');
+    }
+  }
+
+  const footList = document.getElementById('foot-redes-list');
+  if (footList) {
+    const nombres = { instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok', whatsapp: 'WhatsApp' };
+    if (redes.length === 0) {
+      footList.innerHTML = '<li>Instagram</li><li>Facebook</li><li>TikTok</li><li>WhatsApp</li>';
+    } else {
+      footList.innerHTML = redes.map(r => `<a href="${r.url}" target="_blank" rel="noopener">${nombres[r.key]}</a>`).join('');
+    }
+  }
+}
+
+
 function renderAdminProductos() {
   const lista = document.getElementById('adm-prods-list');
   if (!lista) return;
@@ -494,11 +553,17 @@ function saveInfo() {
   const topbar    = document.getElementById('a-topbar').value.trim();
   const navSlogan = document.getElementById('a-nav-slogan').value.trim();
   const ig        = document.getElementById('a-ig').value.trim();
+  const wa        = document.getElementById('a-wa').value.trim();
+  const fb        = document.getElementById('a-fb').value.trim();
+  const tt        = document.getElementById('a-tt').value.trim();
   const newpass   = document.getElementById('a-newpass').value.trim();
 
   if (topbar)    siteData.topbar    = topbar;
   if (navSlogan) siteData.navSlogan = navSlogan;
   if (ig)        siteData.instagram = ig;
+  if (wa)        siteData.whatsapp  = wa;
+  if (fb)        siteData.facebook  = fb;
+  if (tt)        siteData.tiktok    = tt;
 
   /* Cambiar contraseña si se escribió una nueva */
   if (newpass) {
@@ -517,8 +582,150 @@ function saveInfo() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SUBIDA DE IMÁGENES — FUNCIONES HELPER
+   GUARDAR — ASISTENTE VIRTUAL
 ═══════════════════════════════════════════════════════════ */
+function guardarAsistente() {
+  siteData.asistente = {
+    saludo:   document.getElementById('a-as-saludo').value.trim()   || siteData.asistente.saludo,
+    envios:   document.getElementById('a-as-envios').value.trim()   || siteData.asistente.envios,
+    tallas:   document.getElementById('a-as-tallas').value.trim()   || siteData.asistente.tallas,
+    pagos:    document.getElementById('a-as-pagos').value.trim()    || siteData.asistente.pagos,
+    horario:  document.getElementById('a-as-horario').value.trim()  || siteData.asistente.horario,
+    contacto: document.getElementById('a-as-contacto').value.trim() || siteData.asistente.contacto
+  };
+
+  guardarEnNube();
+  showToast('Asistente actualizado y publicado ✓');
+}
+
+/* ── Cargar los valores actuales del asistente en el formulario ── */
+function cargarFormularioAsistente() {
+  const a = siteData.asistente || {};
+  document.getElementById('a-as-saludo').value   = a.saludo   || '';
+  document.getElementById('a-as-envios').value   = a.envios   || '';
+  document.getElementById('a-as-tallas').value   = a.tallas   || '';
+  document.getElementById('a-as-pagos').value    = a.pagos    || '';
+  document.getElementById('a-as-horario').value  = a.horario  || '';
+  document.getElementById('a-as-contacto').value = a.contacto || '';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ASISTENTE VIRTUAL — CHAT FLOTANTE (respuestas predefinidas)
+═══════════════════════════════════════════════════════════ */
+let chatAbierto = false;
+let chatIniciado = false;
+
+function toggleChat() {
+  chatAbierto = !chatAbierto;
+  document.getElementById('chatWindow').classList.toggle('open', chatAbierto);
+  if (chatAbierto && !chatIniciado) {
+    iniciarChat();
+    chatIniciado = true;
+  }
+}
+
+function iniciarChat() {
+  addBotMsg(siteData.asistente.saludo);
+  mostrarRespuestasRapidas();
+}
+
+function addBotMsg(text) {
+  const body = document.getElementById('chatBody');
+  if (!body) return;
+  body.insertAdjacentHTML('beforeend', `<div class="chat-msg chat-msg-bot">${text}</div>`);
+  body.scrollTop = body.scrollHeight;
+}
+
+function addUserMsg(text) {
+  const body = document.getElementById('chatBody');
+  if (!body) return;
+  body.insertAdjacentHTML('beforeend', `<div class="chat-msg chat-msg-user">${text}</div>`);
+  body.scrollTop = body.scrollHeight;
+}
+
+function mostrarRespuestasRapidas() {
+  const cont = document.getElementById('chatQuickReplies');
+  if (!cont) return;
+  const opciones = [
+    { label: "🚚 Envíos",         key: "envios" },
+    { label: "📏 Tallas",         key: "tallas" },
+    { label: "💳 Pagos",          key: "pagos" },
+    { label: "🕐 Horario",        key: "horario" },
+    { label: "💬 Contacto",       key: "contacto" },
+    { label: "🛍 Ver categorías", key: "categorias" },
+    { label: "🏷 Ver ofertas",    key: "ofertas" }
+  ];
+  cont.innerHTML = opciones.map(o => `<button class="chat-qr-btn" onclick="responderRapido('${o.key}')">${o.label}</button>`).join('');
+}
+
+function responderRapido(key) {
+  const etiquetas = {
+    envios: "🚚 Envíos", tallas: "📏 Tallas", pagos: "💳 Pagos",
+    horario: "🕐 Horario", contacto: "💬 Contacto",
+    categorias: "🛍 Ver categorías", ofertas: "🏷 Ver ofertas"
+  };
+  addUserMsg(etiquetas[key] || key);
+
+  if (key === 'categorias') {
+    addBotMsg("¡Aquí las tienes! 👇");
+    setTimeout(() => {
+      toggleChat();
+      const el = document.getElementById('categorias');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 500);
+    return;
+  }
+
+  if (key === 'ofertas') {
+    addBotMsg("Échale un ojo a esto 👇");
+    setTimeout(() => {
+      toggleChat();
+      const el = document.getElementById('oferta');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 500);
+    return;
+  }
+
+  const respuesta = siteData.asistente[key];
+  addBotMsg(respuesta || "Por ahora no tengo esa información, pero puedes escribirnos directamente.");
+}
+
+/* ── Reconocimiento simple de palabras clave en texto libre ── */
+function detectarIntencion(texto) {
+  const t = texto.toLowerCase();
+  if (/(envio|envío|entrega|domicilio|paqueter)/.test(t)) return 'envios';
+  if (/(talla|medida|tama[nñ]o)/.test(t))                 return 'tallas';
+  if (/(pago|tarjeta|transferencia|efectivo)/.test(t))    return 'pagos';
+  if (/(horario|hora|abren|cierran|atienden)/.test(t))    return 'horario';
+  if (/(contacto|whatsapp|instagram|tel[eé]fono)/.test(t))return 'contacto';
+  if (/(gracias)/.test(t))                                return 'gracias';
+  if (/(hola|buenas|buenos dias|buenos días|buenas tardes)/.test(t)) return 'saludo';
+  return null;
+}
+
+function enviarMensajeChat() {
+  const input = document.getElementById('chatInput');
+  const texto = input.value.trim();
+  if (!texto) return;
+
+  addUserMsg(texto);
+  input.value = '';
+
+  const intent = detectarIntencion(texto);
+
+  setTimeout(() => {
+    if (intent === 'gracias') {
+      addBotMsg("¡Con gusto! 💛 ¿Necesitas algo más?");
+    } else if (intent === 'saludo') {
+      addBotMsg("¡Hola de nuevo! ¿En qué te puedo ayudar?");
+    } else if (intent && siteData.asistente[intent]) {
+      addBotMsg(siteData.asistente[intent]);
+    } else {
+      addBotMsg("No estoy segura de haber entendido eso 🤔 Puedes elegir una opción abajo, o escribirnos directo por WhatsApp o Instagram para más detalle.");
+    }
+    mostrarRespuestasRapidas();
+  }, 400);
+}
 
 /* Lee un archivo y llama al callback con el base64.
    Nota: las imágenes se guardan como texto base64 dentro del documento
@@ -659,6 +866,9 @@ function cargarFormularios() {
   document.getElementById('a-topbar').value     = siteData.topbar       || '';
   document.getElementById('a-nav-slogan').value = siteData.navSlogan    || '';
   document.getElementById('a-ig').value         = siteData.instagram    || '';
+  document.getElementById('a-wa').value         = siteData.whatsapp     || '';
+  document.getElementById('a-fb').value         = siteData.facebook     || '';
+  document.getElementById('a-tt').value         = siteData.tiktok       || '';
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -677,6 +887,7 @@ function switchTab(id, btn) {
   if (id === 'categorias') renderCamposCategorias();
   if (id === 'prods')      { renderSelectCategoriasProducto(); renderAdminProductos(); }
   if (id === 'cats')       renderAdminCatalogos();
+  if (id === 'asistente')  cargarFormularioAsistente();
   if (id === 'hero' || id === 'oferta' || id === 'info') cargarFormularios();
 }
 
@@ -702,3 +913,180 @@ function suscribir() {
   document.getElementById('nl-email').value = '';
   showToast('¡Gracias por suscribirte! 👑');
 }
+
+/* ═══════════════════════════════════════════════════════════
+   CARRITO DE COMPRAS (se guarda en el navegador de cada visitante,
+   cada quien tiene su propio carrito local — no se comparte)
+═══════════════════════════════════════════════════════════ */
+let carrito = [];
+try {
+  carrito = JSON.parse(localStorage.getItem('dlau_carrito') || '[]');
+} catch (e) {
+  carrito = [];
+}
+
+function guardarCarritoLocal() {
+  try { localStorage.setItem('dlau_carrito', JSON.stringify(carrito)); } catch (e) {}
+}
+
+/* Convierte un precio como "$1,200" en el número 1200 */
+function parsePrecio(str) {
+  if (!str) return 0;
+  const limpio = String(str).replace(/[^0-9.]/g, '');
+  return parseFloat(limpio) || 0;
+}
+
+function formatoPrecio(num) {
+  return '$' + num.toLocaleString('es-MX', { maximumFractionDigits: 0 });
+}
+
+function agregarAlCarrito(idx) {
+  const p = siteData.productos[idx];
+  if (!p) return;
+
+  const existente = carrito.find(c => c.idx === idx);
+  if (existente) {
+    existente.qty++;
+  } else {
+    carrito.push({ idx, n: p.n, p: p.p, img: p.img, qty: 1 });
+  }
+
+  guardarCarritoLocal();
+  renderCarrito();
+  actualizarBadgeCarrito();
+  showToast(`"${p.n}" agregado al carrito 🛍`);
+}
+
+function cambiarCantidadCarrito(idx, delta) {
+  const item = carrito.find(c => c.idx === idx);
+  if (!item) return;
+
+  item.qty += delta;
+  if (item.qty <= 0) {
+    carrito = carrito.filter(c => c.idx !== idx);
+  }
+
+  guardarCarritoLocal();
+  renderCarrito();
+  actualizarBadgeCarrito();
+}
+
+function quitarDelCarrito(idx) {
+  carrito = carrito.filter(c => c.idx !== idx);
+  guardarCarritoLocal();
+  renderCarrito();
+  actualizarBadgeCarrito();
+}
+
+function calcularTotalCarrito() {
+  return carrito.reduce((total, item) => total + parsePrecio(item.p) * item.qty, 0);
+}
+
+function renderCarrito() {
+  const body = document.getElementById('cartBody');
+  const totalEl = document.getElementById('cartTotal');
+  if (!body || !totalEl) return;
+
+  if (carrito.length === 0) {
+    body.innerHTML = '<div class="cart-empty">Tu carrito está vacío.<br>Explora la colección y agrega tus favoritos ✨</div>';
+    totalEl.textContent = formatoPrecio(0);
+    return;
+  }
+
+  body.innerHTML = carrito.map(item => `
+    <div class="cart-item">
+      <div class="cart-item-img">
+        ${item.img ? `<img src="${item.img}">` : '🛍'}
+      </div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.n}</div>
+        <div class="cart-item-price">${item.p}</div>
+        <div class="cart-item-qty">
+          <button class="cart-qty-btn" onclick="cambiarCantidadCarrito(${item.idx}, -1)">−</button>
+          <span class="cart-qty-num">${item.qty}</span>
+          <button class="cart-qty-btn" onclick="cambiarCantidadCarrito(${item.idx}, 1)">+</button>
+        </div>
+      </div>
+      <button class="cart-item-del" onclick="quitarDelCarrito(${item.idx})" title="Quitar">✕</button>
+    </div>
+  `).join('');
+
+  totalEl.textContent = formatoPrecio(calcularTotalCarrito());
+}
+
+function actualizarBadgeCarrito() {
+  const badge = document.getElementById('cartBadge');
+  if (!badge) return;
+  const total = carrito.reduce((sum, item) => sum + item.qty, 0);
+  if (total > 0) {
+    badge.textContent = total;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function toggleCarrito() {
+  const drawer  = document.getElementById('cartDrawer');
+  const overlay = document.getElementById('cartOverlay');
+  if (!drawer || !overlay) return;
+
+  const abrir = !drawer.classList.contains('open');
+  drawer.classList.toggle('open', abrir);
+  overlay.classList.toggle('open', abrir);
+
+  if (abrir) renderCarrito();
+}
+
+function comprarPorWhatsapp() {
+  if (carrito.length === 0) {
+    alert('Tu carrito está vacío. Agrega algún producto primero.');
+    return;
+  }
+
+  const numero = (siteData.whatsapp || '').replace(/\D/g, '');
+  if (!numero) {
+    alert('La tienda aún no configuró un número de WhatsApp. Ve al panel admin → General para agregarlo.');
+    return;
+  }
+
+  let mensaje = `¡Hola D'LAU! 👋 Quiero hacer un pedido:\n\n`;
+  carrito.forEach(item => {
+    mensaje += `• ${item.n} (x${item.qty}) — ${item.p}\n`;
+  });
+  mensaje += `\nTotal aproximado: ${formatoPrecio(calcularTotalCarrito())}\n\n¿Me ayudan a confirmar tallas, disponibilidad y envío? 🙏`;
+
+  const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+  window.open(url, '_blank');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INTRODUCCIÓN ANIMADA DE BIENVENIDA
+   (se muestra solo una vez por sesión del navegador)
+═══════════════════════════════════════════════════════════ */
+function iniciarIntro() {
+  const overlay = document.getElementById('introOverlay');
+  if (!overlay) return;
+
+  let yaVista = false;
+  try { yaVista = sessionStorage.getItem('dlau_intro_vista') === '1'; } catch (e) {}
+
+  if (yaVista) {
+    overlay.style.display = 'none';
+    return;
+  }
+
+  setTimeout(() => {
+    overlay.classList.add('intro-hide');
+    try { sessionStorage.setItem('dlau_intro_vista', '1'); } catch (e) {}
+  }, 3200);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INICIO — cosas que no dependen de Firebase
+═══════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  iniciarIntro();
+  renderCarrito();
+  actualizarBadgeCarrito();
+});
