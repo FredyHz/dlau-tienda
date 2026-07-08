@@ -17,6 +17,10 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+/* Nota: NO usamos firebase.storage() — esa función requiere el
+   plan de pago "Blaze" de Firebase, que decidimos no activar.
+   En su lugar, los catálogos y fotos grandes se manejan pegando
+   la ruta de un archivo ya subido al repositorio de GitHub. */
 const siteRef = db.collection('dlau').doc('site');
 
 /* ── FILTRO DE CATEGORÍA ACTIVO EN LA VITRINA PÚBLICA ─────── */
@@ -116,9 +120,6 @@ function renderAll() {
 
   const navSlogEl = document.getElementById('nav-slogan-el');
   if (navSlogEl) navSlogEl.textContent = siteData.navSlogan;
-
-  const footIg = document.getElementById('foot-ig');
-  if (footIg) footIg.textContent = siteData.instagram;
 
   /* Logo */
   if (siteData.logo) {
@@ -282,7 +283,7 @@ function linkWhatsapp() {
 
 function renderRedesSociales() {
   const redes = [
-    { key: 'instagram', icono: '📷', url: siteData.instagram },
+    { key: 'instagram', icono: '📷', url: siteData.instagram && siteData.instagram !== 'Instagram' ? siteData.instagram : '' },
     { key: 'facebook',  icono: '📘', url: siteData.facebook },
     { key: 'tiktok',    icono: '🎵', url: siteData.tiktok },
     { key: 'whatsapp',  icono: '💬', url: linkWhatsapp() }
@@ -308,7 +309,9 @@ function renderRedesSociales() {
   }
 }
 
-
+/* ═══════════════════════════════════════════════════════════
+   RENDERIZADO DE PRODUCTOS EN EL PANEL ADMIN
+═══════════════════════════════════════════════════════════ */
 function renderAdminProductos() {
   const lista = document.getElementById('adm-prods-list');
   if (!lista) return;
@@ -353,17 +356,22 @@ function addProd() {
   const po = document.getElementById('p-po').value.trim();
   const b  = document.getElementById('p-b').value;
   const catId = document.getElementById('p-c').value;
+  const imgUrlManual = document.getElementById('p-img-url').value.trim();
 
   if (!n || !p) {
     alert('El nombre y el precio son obligatorios.');
     return;
   }
 
-  siteData.productos.push({ n, p, po, b, catId, img: tmp.prodImg || '' });
+  /* Si escribiste una ruta de GitHub (opción 2), esa tiene prioridad
+     sobre la foto subida directamente (opción 1) */
+  const imgFinal = imgUrlManual || tmp.prodImg || '';
+
+  siteData.productos.push({ n, p, po, b, catId, img: imgFinal });
   tmp.prodImg = '';
 
   /* Limpiar campos */
-  ['p-n', 'p-p', 'p-po'].forEach(id => document.getElementById(id).value = '');
+  ['p-n', 'p-p', 'p-po', 'p-img-url'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('p-b').value = '';
   document.getElementById('prev-prod-img').innerHTML = '';
 
@@ -413,20 +421,37 @@ function renderAdminCatalogos() {
   `).join('');
 }
 
-/* ── Agregar catálogo ──────────────────────────────────── */
+/* ── Agregar catálogo (pegando la ruta/link, sin subir archivo) ── */
 function addCat() {
-  const n = document.getElementById('c-n').value.trim();
-  if (!n) { alert('Escribe el nombre del catálogo.'); return; }
+  const n   = document.getElementById('c-n').value.trim();
+  const url = document.getElementById('c-url').value.trim();
 
-  siteData.catalogos.push({ n, url: tmp.catUrl || '' });
-  tmp.catUrl = '';
+  if (!n)   { alert('Escribe el nombre del catálogo.'); return; }
+  if (!url) { alert('Pega la ruta o link del archivo (ej: catalogo/primavera-2026.pdf).'); return; }
 
-  document.getElementById('c-n').value = '';
-  document.getElementById('cat-fname').textContent = '';
+  /* Evitar URLs temporales del navegador (blob: o data:) que solo
+     funcionan en esa sesión/pestaña y nunca funcionan para tus
+     clientes. Esto pasa cuando se arrastra o abre un archivo
+     directo en Chrome y se copia esa dirección por error, en vez
+     de subir el archivo al repositorio de GitHub y pegar su ruta real. */
+  if (url.startsWith('blob:') || url.startsWith('data:')) {
+    alert(
+      'Esa ruta no es válida: parece una dirección temporal del navegador ' +
+      '(empieza con "blob:" o "data:") y no funcionará para tus clientes.\n\n' +
+      'Primero sube el archivo PDF a tu repositorio de GitHub con GitHub Desktop, ' +
+      'y luego pega aquí su ruta real, por ejemplo:\ncatalogo/primavera-2026.pdf'
+    );
+    return;
+  }
+
+  siteData.catalogos.push({ n, url });
+
+  document.getElementById('c-n').value   = '';
+  document.getElementById('c-url').value = '';
 
   renderAll();
   guardarEnNube();
-  showToast('Catálogo agregado ✓');
+  showToast('Catálogo agregado y publicado ✓');
 }
 
 /* ── Eliminar catálogo ─────────────────────────────────── */
@@ -457,7 +482,7 @@ function renderCamposCategorias() {
         <input class="fi" id="cat-s-${i}" value="${cat.sub}" placeholder="Ej: Nueva colección">
       </div>
       <div class="fg">
-        <label class="flbl">Foto de la categoría</label>
+        <label class="flbl">Foto de la categoría (opción 1: subir directo)</label>
         <div class="upl" onclick="document.getElementById('inp-cat-img-${i}').click()">
           <div style="font-size:24px;">📷</div>
           <p>Subir foto para esta categoría</p>
@@ -465,6 +490,13 @@ function renderCamposCategorias() {
         </div>
         <div class="upl-prev" id="prev-cat-${i}">
           ${cat.img ? `<div class="upl-thumb"><img src="${cat.img}"></div>` : ''}
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flbl">Foto de la categoría (opción 2: ruta desde tu repositorio de GitHub)</label>
+        <div style="display:flex; gap:8px;">
+          <input class="fi" id="cat-img-url-${i}" placeholder="ej: img/categoria-ropa.jpg" style="margin-bottom:0;">
+          <button class="btn-save" style="margin-top:0; white-space:nowrap;" onclick="usarRutaCategoria(${i})">Usar</button>
         </div>
       </div>
       <button class="btn-save" onclick="guardarCategoria(${i})">Guardar Categoría ${i + 1}</button>
@@ -485,6 +517,19 @@ function guardarCategoria(i) {
   guardarEnNube();
 
   showToast(`Categoría "${siteData.categorias[i].nombre}" guardada y publicada ✓`);
+}
+
+/* ── Usar una ruta de imagen de GitHub para una categoría ── */
+function usarRutaCategoria(idx) {
+  const input = document.getElementById(`cat-img-url-${idx}`);
+  const ruta = input.value.trim();
+  if (!ruta) { alert('Escribe la ruta o URL de la imagen.'); return; }
+
+  siteData.categorias[idx].img = ruta;
+  input.value = '';
+  renderAll();
+  guardarEnNube();
+  showToast('Foto de categoría actualizada (desde GitHub) ✓');
 }
 
 /* ── Agregar categoría nueva (además de las 6 fijas) ───── */
@@ -727,10 +772,15 @@ function enviarMensajeChat() {
   }, 400);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   SUBIDA DE IMÁGENES — FUNCIONES HELPER
+═══════════════════════════════════════════════════════════ */
+
 /* Lee un archivo y llama al callback con el base64.
    Nota: las imágenes se guardan como texto base64 dentro del documento
    de Firebase. Para que todo funcione bien, usa fotos ligeras (ideal:
-   menos de 300-400 KB cada una). */
+   menos de 300-400 KB cada una), o mejor aún, usa la opción de "ruta
+   de GitHub" para catálogos grandes. */
 function leerArchivo(input, callback) {
   const file = input.files[0];
   if (!file) return;
@@ -783,19 +833,6 @@ function uploadOfertaImg(input) {
     guardarEnNube();
     showToast('Imagen de oferta actualizada y publicada ✓');
   });
-}
-
-/* ── Catálogo (PDF o imagen) — se guarda como URL temporal local ── */
-function uploadCat(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  /* Nota: esta URL solo funciona en el navegador donde se subió.
-     Para que el catálogo sea visible en todos los dispositivos,
-     lo ideal es subir el PDF a un servicio externo (Google Drive,
-     Dropbox) y pegar aquí el link de descarga en el futuro. */
-  tmp.catUrl = URL.createObjectURL(file);
-  document.getElementById('cat-fname').textContent = '✓ ' + file.name;
 }
 
 /* ── Imagen de categoría ───────────────────────────────── */

@@ -358,13 +358,17 @@
             <select class="fi" id="p-c"></select>
           </div>
           <div class="fg">
-            <label class="flbl">Foto del producto</label>
+            <label class="flbl">Foto del producto (opción 1: subir directo — solo para 1 o 2 fotos sueltas)</label>
             <div class="upl" onclick="document.getElementById('inp-prod-img').click()">
               <div style="font-size:28px;">📸</div>
               <p>Subir foto del producto</p>
               <input type="file" id="inp-prod-img" accept="image/*" onchange="uploadProdImg(this)">
             </div>
             <div class="upl-prev" id="prev-prod-img"></div>
+          </div>
+          <div class="fg">
+            <label class="flbl">Foto del producto (opción 2: ruta de una foto ya subida a tu repositorio de GitHub — recomendado para catálogos grandes)</label>
+            <input class="fi" id="p-img-url" placeholder="ej: img/tenis-negro.jpg">
           </div>
           <button class="btn-save" onclick="addProd()">Agregar Producto</button>
         </div>
@@ -399,19 +403,14 @@
 
         <!-- TAB: CATÁLOGOS -->
         <div class="tab-s" id="tab-cats">
-          <p class="tab-note">Sube catálogos en PDF o imagen. Aparecerán en la sección de catálogos de la página.</p>
+          <p class="tab-note">Los catálogos (PDF o imagen) no se suben directo desde aquí — primero súbelos a tu repositorio de GitHub (con GitHub Desktop, igual que subes las fotos), y después pega aquí el nombre y la ruta o link donde quedó guardado.</p>
           <div class="fg">
             <label class="flbl">Nombre del catálogo</label>
             <input class="fi" id="c-n" placeholder="Catálogo Primavera 2026">
           </div>
           <div class="fg">
-            <label class="flbl">Archivo (PDF o imagen)</label>
-            <div class="upl" onclick="document.getElementById('inp-cat-file').click()">
-              <div style="font-size:28px;">📄</div>
-              <p>Subir catálogo PDF o imagen</p>
-              <input type="file" id="inp-cat-file" accept=".pdf,image/*" onchange="uploadCat(this)">
-            </div>
-            <div id="cat-fname" style="font-size:10px;color:#C9A84C;margin-top:6px;letter-spacing:1px;"></div>
+            <label class="flbl">Ruta o link del archivo (ej: catalogo/primavera-2026.pdf)</label>
+            <input class="fi" id="c-url" placeholder="ej: catalogo/primavera-2026.pdf">
           </div>
           <button class="btn-save" onclick="addCat()">Agregar Catálogo</button>
           <div class="divider-gold"></div>
@@ -487,13 +486,6 @@
     </div><!-- fin admContent -->
   </div><!-- fin adm-overlay -->
 
-  <!-- SDK DE FIREBASE (base de datos en la nube) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-  <!-- ═══════════════════════════════════════════
-       ASISTENTE VIRTUAL — CHAT FLOTANTE
-  ═══════════════════════════════════════════ -->
   <!-- ═══════════════════════════════════════════
        CARRITO DE COMPRAS
   ═══════════════════════════════════════════ -->
@@ -514,6 +506,9 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════
+       ASISTENTE VIRTUAL — CHAT FLOTANTE
+  ═══════════════════════════════════════════ -->
   <button class="chat-bubble-btn" onclick="toggleChat()" id="chatBubbleBtn" title="Habla con Lau, tu asistente">💬</button>
 
   <div class="chat-window" id="chatWindow">
@@ -535,7 +530,7 @@
     </div>
   </div>
 
-  <!-- FIREBASE (base de datos en la nube) -->
+  <!-- SDK DE FIREBASE (base de datos en la nube) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
